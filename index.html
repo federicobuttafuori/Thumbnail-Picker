@@ -2,6 +2,12 @@
 <html lang="en">
 
 <head>
+  <link rel="icon" type="image/x-icon" href="E:\sas\Altro\Scripts & Apps (CODING)\online-video-thumbnail-generator-master\img\shrek.ico">
+  <!-- 
+  Tech: "E:\sas\Altro\Scripts & Apps (CODING)\online-video-thumbnail-generator-master\img\Jommans-Ironman-Style-Folder-Video.256.ico" 
+  Shrek: "E:\sas\Altro\Scripts & Apps (CODING)\online-video-thumbnail-generator-master\img\shrek.ico"
+  Thunder: "E:\sas\Altro\Scripts & Apps (CODING)\online-video-thumbnail-generator-master\img\THunder swap.ico"
+   -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -183,11 +189,13 @@
             <label class="mdc-text-field mdc-text-field--filled" id="videowidth" >
               <span class="mdc-text-field__ripple"></span>
               <span class="mdc-floating-label" id="size-label">Snap width</span>
-              <input id="videow" type=number size="5" onchange="resize()" value="640" class="mdc-text-field__input"
-                type="text" placeholder="" aria-labelledby="size-label" readonly>
+              <input id="videow" type=number size="5" onchange="resize()" value="1600" class="mdc-text-field__input"
+                type="text" placeholder="" aria-labelledby="size-label">
               <span class="mdc-line-ripple"></span>
             </label>
   
+
+            
             <button id="snap" class="mdc-button mdc-button--raised" onclick="snapPicture()" disabled>
               <span class="mdc-button__ripple"></span>
               <span class="mdc-button__touch"></span>
@@ -238,6 +246,7 @@
             <span class="mdc-button__ripple"></span>
             <span class="mdc-button__touch"></span>
             <span class="mdc-button__label save_txt">Save All</span>
+            <span id="snapsize"></span>
           </button>
           <span id="snapsize"></span>
 

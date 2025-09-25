@@ -51,7 +51,7 @@ video.addEventListener(
   "loadedmetadata",
   function () {
     console.log("Metadata loaded");
-    videow.value = video.videoWidth;
+    // videow.value = video.videoWidth;
     videoInfo.innerHTML = [
       "Video size: " + video.videoWidth + "x" + video.videoHeight,
       "Video length: " + Math.round(video.duration * 10) / 10 + "sec",
@@ -70,27 +70,39 @@ function resize() {
   h = parseInt(w / ratio, 10);
   canvas.width = w;
   canvas.height = h;
+  snapSize.innerHTML = w + "x" + h;
 }
 
 function snapPicture() {
   context.fillRect(0, 0, w, h);
   context.drawImage(video, 0, 0, w, h);
-  var time = video.currentTime
+  var time = video.currentTime;
+  var dataURL = canvas.toDataURL("image/png");
+
+  // Calculate file size in MB
+  var byteString = atob(dataURL.split(',')[1]);
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+  for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+  }
+  var blob = new Blob([ab], {type: "image/png"});
+  var sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
 
   const container = document.querySelector("#outputs");
   const img = document.createElement("img");
-  img.src = canvas.toDataURL();
+  img.src = dataURL;
   img.className = "output";
   img.addEventListener("click", () => selectImage(img));
-  img.title="t"+("000" + time.toFixed(2)).slice(-7)+'seg'
-  img.onclick=function(){ goToTime(video,time) }
-  
+  img.title="t"+("000" + time.toFixed(2)).slice(-7)+'seg';
+  img.onclick=function(){ goToTime(video,time) };
+
   var cont = document.createElement("div");
   cont.className = "output-container";
   cont.style.display = "inline-block";
   cont.appendChild(img);
   var label=document.createElement("label");
-  label.innerHTML=(time.toFixed(2))+'s '+w+"x"+h
+  label.innerHTML=(time.toFixed(2))+'s '+w+"x"+h+' '+sizeMB+'MB';
   cont.appendChild(label);
 
   var close = document.createElement("a");
@@ -101,14 +113,14 @@ function snapPicture() {
     if (container.children.length == 0) {
       save.disabled = true;
       saveall.disabled = true;
-      clear.disabled = true
+      clear.disabled = true;
     }
-  })
+  });
   cont.appendChild(close);
-  
+
   container.appendChild(cont);
   img.setAttribute("size",w + "x" + h);
-  selectImage(img)
+  selectImage(img);
 }
 function autoSnapPictureAfterSelection(){
   var sel = document.querySelector('#snap_each')
@@ -247,10 +259,10 @@ function loadVideoFile() {
     video.pleload = "metadata";
     video.objectURL = true;
     video.src = URL.createObjectURL(fileInput);
-    videow.removeAttribute("readonly");
     snap.disabled = false;
     snap2.disabled = false;
     videoControls.style.display = "";
+    resize(); // Add this line to update the snapshot size
   }
 }
 
@@ -271,10 +283,10 @@ function loadVideoFromFile(file) {
 function loadVideoURL(url) {
   video.preload = "metadata";
   video.src = url;
-  videow.removeAttribute("readonly");
   snap.disabled = false;
   snap2.disabled = false;
   videoControls.style.display = "";
+  resize(); // Add this line to update the snapshot size
 }
 
 function savePicture(btn) {
