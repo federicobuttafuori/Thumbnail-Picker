@@ -2,13 +2,16 @@
 <html lang="en">
 
 <head>
-  <link rel="icon" type="image/x-icon" href="E:\sas\Altro\Scripts & Apps (CODING)\online-video-thumbnail-generator-master\img\frame_photo_gallery_image_images_picture_icon_258914.ico">
+  <link rel="icon" type="image/x-icon" href="C:\Users\feder\Desktop\Thumbnail Picker\img\picture_16720983.ico">
   <!-- 
+  
   Tech: "E:\sas\Altro\Scripts & Apps (CODING)\online-video-thumbnail-generator-master\img\Jommans-Ironman-Style-Folder-Video.256.ico" 
   Shrek: "E:\sas\Altro\Scripts & Apps (CODING)\online-video-thumbnail-generator-master\img\shrek.ico"
   Thunder: "E:\sas\Altro\Scripts & Apps (CODING)\online-video-thumbnail-generator-master\img\THunder swap.ico"
   Frame: "E:\sas\Altro\Scripts & Apps (CODING)\online-video-thumbnail-generator-master\img\frame_photo_gallery_image_images_picture_icon_258914.ico"
-   -->
+  Frame: picture_16720983.ico
+  
+  -->
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,6 +56,48 @@
       outline: 6px dashed rgba(0, 150, 255, 0.25);
       outline-offset: -6px;
     }
+
+    /* Speed indicator overlay */
+    .speed-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .speed-indicator.show {
+      opacity: 1;
+    }
+
+    /* Mute indicator overlay */
+    .mute-indicator {
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .mute-indicator.show {
+      opacity: 1;
+    }
   </style>
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-RKLKKLZFDQ"></script>
@@ -67,6 +112,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <script>
     var snapProc;
+    var speedIndicatorTimeout;
+    var muteIndicatorTimeout;
+
     function showInput(id, opt) {
       console.log(opt)
       document.getElementById('select-file').style.display = 'none';
@@ -86,6 +134,55 @@
 
       // Setup drag & drop everywhere
       setupGlobalDragAndDrop();
+
+      // Create speed and mute indicators
+      createIndicators();
+    }
+
+    // Create visual indicators for speed and mute
+    function createIndicators() {
+      // Speed indicator
+      const speedIndicator = document.createElement('div');
+      speedIndicator.id = 'speed-indicator';
+      speedIndicator.className = 'speed-indicator';
+      speedIndicator.textContent = '1x';
+      document.body.appendChild(speedIndicator);
+
+      // Mute indicator
+      const muteIndicator = document.createElement('div');
+      muteIndicator.id = 'mute-indicator';
+      muteIndicator.className = 'mute-indicator';
+      muteIndicator.textContent = 'MUTED';
+      document.body.appendChild(muteIndicator);
+    }
+
+    // Show speed indicator temporarily
+    function showSpeedIndicator(speed) {
+      const indicator = document.getElementById('speed-indicator');
+      if (!indicator) return;
+      
+      indicator.textContent = speed + 'x';
+      indicator.classList.add('show');
+      
+      clearTimeout(speedIndicatorTimeout);
+      speedIndicatorTimeout = setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 1500);
+    }
+
+    // Show mute indicator temporarily
+    function showMuteIndicator(isMuted) {
+      const indicator = document.getElementById('mute-indicator');
+      if (!indicator) return;
+      
+      indicator.textContent = isMuted ? 'MUTED' : 'UNMUTED';
+      indicator.style.backgroundColor = isMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 150, 0, 0.8)';
+      indicator.classList.add('show');
+      
+      clearTimeout(muteIndicatorTimeout);
+      muteIndicatorTimeout = setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 1500);
     }
     
     // Enhanced keyboard control system
@@ -102,6 +199,37 @@
         const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : null;
         const isEditable = tag === 'input' || tag === 'textarea' || (e.target && e.target.isContentEditable);
         if (isEditable) return;
+
+        // Handle speed controls (Shift + comma/period)
+        if (e.shiftKey && (e.code === 'Comma' || e.code === 'Period')) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const currentSpeed = video.playbackRate;
+          let newSpeed;
+          
+          if (e.code === 'Comma') {
+            // Shift + , (slower)
+            newSpeed = Math.max(0.25, currentSpeed - 0.25);
+          } else {
+            // Shift + . (faster) 
+            newSpeed = Math.min(2, currentSpeed + 0.25);
+          }
+          
+          video.playbackRate = newSpeed;
+          showSpeedIndicator(newSpeed);
+          return;
+        }
+
+        // Handle mute toggle (M key)
+        if (e.code === 'KeyM') {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          video.muted = !video.muted;
+          showMuteIndicator(video.muted);
+          return;
+        }
 
         // Prevent default behavior for our custom shortcuts where appropriate
         const shouldPreventDefault = (
